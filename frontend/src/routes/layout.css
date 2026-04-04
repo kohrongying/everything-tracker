@@ -1,0 +1,36 @@
+@import 'tailwindcss';
+@plugin 'daisyui';
+
+/* Global styles */
+:global(html, body) {
+	height: 100%;
+	margin: 0;
+}
+
+:global(body) {
+	display: flex;
+	flex-direction: column;
+	margin: 0;
+}
+
+:global(#svelte) {
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+}
+
+:global(*),
+:global(*::before),
+:global(*::after) {
+	box-sizing: border-box;
+}
+
+/* Smooth transitions */
+:global(a) {
+	@apply transition-colors;
+}
+
+/* Card hover effect */
+:global(.card) {
+	@apply transition-all duration-300;
+}
