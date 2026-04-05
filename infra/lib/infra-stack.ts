@@ -10,8 +10,25 @@ export class InfraStack extends cdk.Stack {
 
     // Lambda function for the backend
     const backendFunction = new lambda.Function(this, 'EverythingTrackerBackend', {
-      runtime: lambda.Runtime.PYTHON_3_10,
-      code: lambda.Code.fromAsset(path.join(__dirname, '../../backend')),
+      runtime: lambda.Runtime.PYTHON_3_14,
+      code: lambda.Code.fromAsset(path.join(__dirname, '../../backend'), {
+        bundling: {
+          image: lambda.Runtime.PYTHON_3_14.bundlingImage,
+          command: [
+            'bash', '-c',
+            [
+              // install uv
+              'pip install uv',
+
+              // install deps into /asset-output
+              'uv sync --no-dev --target /asset-output',
+
+              // copy source code
+              'cp -r . /asset-output'
+            ].join(' && ')
+          ],
+        },
+      }),
       handler: 'app.main.handler',
       timeout: cdk.Duration.seconds(30),
       memorySize: 256,
@@ -23,8 +40,11 @@ export class InfraStack extends cdk.Stack {
 
     // API Gateway
     const api = new apigateway.RestApi(this, 'EverythingTrackerAPI', {
-      restApiName: 'everything-tracker-api',
+      restApiName: 'EverythingTrackerAPI',
       description: 'API for Everything Tracker application',
+      endpointConfiguration: {
+        types: [apigateway.EndpointType.REGIONAL]
+      },
       defaultCorsPreflightOptions: {
         allowOrigins: apigateway.Cors.ALL_ORIGINS,
         allowMethods: apigateway.Cors.ALL_METHODS,
