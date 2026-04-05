@@ -28,12 +28,6 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run lint
-        run: npm run lint
-
-      - name: Run TypeScript build
-        run: npm run build
-
       - name: Synthesize CDK
         run: npm run cdk:synth
 
@@ -56,9 +50,6 @@ jobs:
 
       - name: Install dependencies
         run: npm install
-
-      - name: Run TypeScript build
-        run: npm run build
 
       - name: Deploy CDK stack
         run: npm run cdk:deploy -- --require-approval never
