@@ -17,12 +17,12 @@ export class InfraStack extends cdk.Stack {
           command: [
             'bash', '-c',
             [
+              // Set writable cache for uv (avoid permission issues when bundling)
+              'export UV_CACHE_DIR=/tmp/.uv',
               // install uv
               'pip install uv',
-
               // install deps into /asset-output
-              'uv sync --no-dev --target /asset-output',
-
+              'uv pip install --system --target /asset-output .',
               // copy source code
               'cp -r . /asset-output'
             ].join(' && ')
