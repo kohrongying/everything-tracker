@@ -1,0 +1,64 @@
+name: Deploy Backend Infra
+
+on:
+  push:
+    branches: [main, dev]
+    paths:
+      - 'backend/**'
+      - 'infra/**'
+      - '.github/workflows/deploy-backend.yml'
+
+permissions:
+  id-token: write   # REQUIRED for OIDC
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run lint
+        run: npm run lint
+
+      - name: Run TypeScript build
+        run: npm run build
+
+      - name: Synthesize CDK
+        run: npm run cdk:synth
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-session-name: github-actions-deploy
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run TypeScript build
+        run: npm run build
+
+      - name: Deploy CDK stack
+        run: npm run cdk:deploy -- --require-approval never
