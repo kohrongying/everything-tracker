@@ -34,7 +34,7 @@ export class InfraStack extends cdk.Stack {
       memorySize: 256,
       environment: {
         // Add environment variables as needed
-        STAGE: 'prod',
+        STAGE: 'prod', // Defaults to RestApi default stage name
       },
     });
 
