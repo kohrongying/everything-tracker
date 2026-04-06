@@ -1,12 +1,12 @@
 import logging
 import sys
 from fastapi import FastAPI, Request
-from fastapi.middleware.base import BaseHTTPMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 from app.routers import auth, expense, food, exercise, focus
 from mangum import Mangum
 import os
 import json
-from datetime import datetime
+from datetime import datetime, UTC
 
 # Configure logging for AWS CloudWatch
 class CloudWatchFormatter(logging.Formatter):
@@ -14,7 +14,7 @@ class CloudWatchFormatter(logging.Formatter):
 
     def format(self, record):
         # Add timestamp in ISO format
-        record.timestamp = datetime.now(datetime.UTC).isoformat()
+        record.timestamp = datetime.now(UTC).isoformat()
 
         # Add stage information
         record.stage = os.getenv("STAGE", "local")
@@ -63,7 +63,7 @@ app = FastAPI(root_path=root_path)
 # Custom middleware for request logging
 class RequestLoggingMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        start_time = datetime.now(datetime.UTC)
+        start_time = datetime.now(UTC)
 
         # Log incoming request
         app_logger.info(
@@ -80,7 +80,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
 
         try:
             response = await call_next(request)
-            process_time = (datetime.now(datetime.UTC) - start_time).total_seconds()
+            process_time = (datetime.now(UTC) - start_time).total_seconds()
 
             # Log successful response
             app_logger.info(
@@ -98,7 +98,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
             return response
 
         except Exception as e:
-            process_time = (datetime.utcnow() - start_time).total_seconds()
+            process_time = (datetime.now(UTC) - start_time).total_seconds()
 
             # Log error response
             app_logger.error(
