@@ -18,3 +18,8 @@ dependencies = [
     "python-multipart>=0.0.22",
     "uvicorn>=0.43.0",
 ]
+
+[dependency-groups]
+dev = [
+    "aws-lambda-powertools>=3.26.0",
+]

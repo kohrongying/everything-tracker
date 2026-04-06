@@ -35,6 +35,16 @@ FastAPI backend for the Everything Tracker application, providing REST API endpo
 
 The API will be available at: http://localhost:8000
 
+## Adding Dependency
+
+```bash
+// Dev
+uv add --dev <package>
+
+// Dev and Prod
+uv add <package>
+```
+
 ## 📋 Environment Variables
 
 Create a `.env` file in the backend directory with the following variables:

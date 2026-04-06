@@ -8,12 +8,18 @@ export class InfraStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
+    // https://docs.aws.amazon.com/powertools/python/3.14.0/#x86_65
+    const powertools_layer = lambda.LayerVersion.fromLayerVersionArn(this, "lambda-powertools",
+      `arn:aws:lambda:${props?.env?.region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python313-x86_64:16`,
+    )
+
     // Lambda function for the backend
     const backendFunction = new lambda.Function(this, 'EverythingTrackerBackend', {
-      runtime: lambda.Runtime.PYTHON_3_14,
+      runtime: lambda.Runtime.PYTHON_3_13,
+      layers: [powertools_layer],
       code: lambda.Code.fromAsset(path.join(__dirname, '../../backend'), {
         bundling: {
-          image: lambda.Runtime.PYTHON_3_14.bundlingImage,
+          image: lambda.Runtime.PYTHON_3_13.bundlingImage,
           command: [
             'bash', '-c',
             [
@@ -21,8 +27,10 @@ export class InfraStack extends cdk.Stack {
               'export UV_CACHE_DIR=/tmp/.uv',
               // install uv
               'pip install uv',
+              // Export deps to requirements.txt
+              'uv export --frozen --no-dev --no-editable -o requirements.txt',
               // install deps into /asset-output
-              'uv pip install --system --target /asset-output .',
+              'uv pip install --system --target /asset-output -r requirements.txt',
               // copy source code
               'cp -r . /asset-output'
             ].join(' && ')

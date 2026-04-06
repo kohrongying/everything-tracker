@@ -57,7 +57,7 @@ def request_magic_link(request: MagicLinkRequest):
 
     return {"message": "Magic link sent successfully. Check your email."}
 
-@router.post("/verify", response_model=TokenResponse)
+@router.get("/verify", response_model=TokenResponse)
 def verify_magic_link(token: str):
     """Verify magic link token and return access token."""
     logger.info(
