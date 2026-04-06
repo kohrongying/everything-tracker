@@ -35,6 +35,7 @@ export class InfraStack extends cdk.Stack {
       environment: {
         // Add environment variables as needed
         STAGE: 'prod', // Defaults to RestApi default stage name
+        SES_FROM_EMAIL: 'rongdevs@gmail.com'
       },
     });
 
@@ -65,10 +66,6 @@ export class InfraStack extends cdk.Stack {
     const proxyResource = rootResource.addResource('{proxy+}');
     proxyResource.addMethod('ANY', lambdaIntegration);
 
-    // Output the API Gateway URL
-    new cdk.CfnOutput(this, 'ApiGatewayUrl', {
-      value: api.url,
-      description: 'API Gateway URL',
-    });
+    backendFunction.addEnvironment('FRONTEND_URL', api.url);
   }
 }
