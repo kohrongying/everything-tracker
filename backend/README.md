@@ -30,7 +30,8 @@ FastAPI backend for the Everything Tracker application, providing REST API endpo
 
 5. **Run the application**:
    ```bash
-   uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+   # Port on 8080
+   uv run fastapi dev
    ```
 
 The API will be available at: http://localhost:8000

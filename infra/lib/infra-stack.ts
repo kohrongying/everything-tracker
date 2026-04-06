@@ -15,11 +15,11 @@ export class InfraStack extends cdk.Stack {
 
     // Lambda function for the backend
     const backendFunction = new lambda.Function(this, 'EverythingTrackerBackend', {
-      runtime: lambda.Runtime.PYTHON_3_13,
+      runtime: lambda.Runtime.PYTHON_3_14,
       layers: [powertools_layer],
       code: lambda.Code.fromAsset(path.join(__dirname, '../../backend'), {
         bundling: {
-          image: lambda.Runtime.PYTHON_3_13.bundlingImage,
+          image: lambda.Runtime.PYTHON_3_14.bundlingImage,
           command: [
             'bash', '-c',
             [
@@ -30,7 +30,7 @@ export class InfraStack extends cdk.Stack {
               // Export deps to requirements.txt
               'uv export --frozen --no-dev --no-editable -o requirements.txt',
               // install deps into /asset-output
-              'uv pip install --system --target /asset-output -r requirements.txt',
+              'pip install --target /asset-output -r requirements.txt',
               // copy source code
               'cp -r . /asset-output'
             ].join(' && ')
