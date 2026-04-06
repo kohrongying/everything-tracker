@@ -67,5 +67,10 @@ export class InfraStack extends cdk.Stack {
     proxyResource.addMethod('ANY', lambdaIntegration);
 
     backendFunction.addEnvironment('FRONTEND_URL', api.url);
+
+    backendFunction.addToRolePolicy(new cdk.aws_iam.PolicyStatement({
+      actions: ['ses:SendEmail', 'ses:SendRawEmail'],
+      resources: ['*'], // Consider restricting this to specific SES resources in production
+    }));
   }
 }
