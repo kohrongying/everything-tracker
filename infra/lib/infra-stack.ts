@@ -86,7 +86,7 @@ export class InfraStack extends cdk.Stack {
     // Grant SES permissions to the Lambda function
     backendFunction.addToRolePolicy(new cdk.aws_iam.PolicyStatement({
       actions: ['ses:SendEmail', 'ses:SendRawEmail'],
-      resources: ['*'], // Consider restricting this to specific SES resources in production
+      resources: [`arn:aws:ses:${props?.env?.region}:${props?.env?.account}:identity/rongdevs@gmail.com`],
     }));
 
     backendFunction.addToRolePolicy(new cdk.aws_iam.PolicyStatement({
