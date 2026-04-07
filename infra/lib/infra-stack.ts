@@ -3,6 +3,7 @@ import { Construct } from 'constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as path from 'path';
+import * as ssm from 'aws-cdk-lib/aws-ssm';
 
 export class InfraStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -43,7 +44,9 @@ export class InfraStack extends cdk.Stack {
       environment: {
         // Add environment variables as needed
         STAGE: 'prod', // Defaults to RestApi default stage name
-        SES_FROM_EMAIL: 'rongdevs@gmail.com'
+        SES_FROM_EMAIL: 'rongdevs@gmail.com',
+        FRONTEND_URL_PARAMETER_NAME: '/everything-tracker/rest-api-url',
+        JWT_SECRET_KEY_PARAMETER_NAME: '/everything-tracker/jwt-secret-key'
       },
     });
 
@@ -74,9 +77,29 @@ export class InfraStack extends cdk.Stack {
     const proxyResource = rootResource.addResource('{proxy+}');
     proxyResource.addMethod('ANY', lambdaIntegration);
 
+    // Create parameter store string
+    new ssm.StringParameter(this, 'RestApiUrl', {
+      parameterName: '/everything-tracker/rest-api-url',
+      stringValue: api.url
+    });
+
+    // Grant SES permissions to the Lambda function
     backendFunction.addToRolePolicy(new cdk.aws_iam.PolicyStatement({
       actions: ['ses:SendEmail', 'ses:SendRawEmail'],
       resources: ['*'], // Consider restricting this to specific SES resources in production
     }));
-  }
-}
+
+    backendFunction.addToRolePolicy(new cdk.aws_iam.PolicyStatement({
+      actions: ['ssm:GetParameter'],
+      resources: [
+        `arn:aws:ssm:${props?.env?.region}:${props?.env?.account}:parameter/everything-tracker/jwt-secret-key`,
+        `arn:aws:ssm:${props?.env?.region}:${props?.env?.account}:parameter/everything-tracker/rest-api-url`
+      ],
+    }));
+
+    backendFunction.addToRolePolicy(new cdk.aws_iam.PolicyStatement({
+      actions: ['kms:Decrypt'],
+      resources: ['*'], // Consider restricting this to specific KMS keys in production
+    }));
+  
+}}
