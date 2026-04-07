@@ -69,7 +69,7 @@ OPENAI_API_KEY=your-openai-api-key
 ### Running with Auto-reload
 
 ```bash
-uvicorn app.main:app --reload
+uv run fastapi dev
 ```
 
 ### API Documentation
@@ -155,17 +155,6 @@ curl -X POST "http://localhost:8000/expense/" \
 1. Start the server
 2. Visit http://localhost:8000/docs
 3. Use the interactive Swagger UI to test endpoints
-
-## 🚀 Deployment
-
-### Local Development
-```bash
-# Run with uvicorn
-uvicorn app.main:app --host 0.0.0.0 --port 8000
-
-# Run with gunicorn (production-like)
-gunicorn app.main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
-```
 
 ### AWS Lambda Deployment
 
