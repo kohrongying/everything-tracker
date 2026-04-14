@@ -5,6 +5,7 @@ from pydantic import BaseModel, EmailStr
 from app.auth.dependencies import get_current_user
 from app.auth.oauth import send_magic_link_email, verify_magic_link_token, generate_access_token
 from app.models.user import User
+from app.services.dynamodb import create_or_get_user
 
 router = APIRouter()
 logger = logging.getLogger("everything-tracker.auth")
@@ -85,7 +86,9 @@ def verify_magic_link(token: str):
             detail="Invalid or expired magic link"
         )
 
-    access_token = generate_access_token(email)
+    # Create or get user in DynamoDB
+    user = create_or_get_user(email)
+    access_token = generate_access_token(user.uuid)
 
     logger.info(
         "Magic link verified successfully",
@@ -105,7 +108,7 @@ def get_me(current_user: User = Depends(get_current_user)):
         "User profile accessed",
         extra={
             "extra_fields": {
-                "email": current_user.email,
+                "uuid": current_user.uuid,
                 "event": "user_profile_accessed",
             }
         }

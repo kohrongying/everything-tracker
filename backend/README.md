@@ -8,6 +8,7 @@ FastAPI backend for the Everything Tracker application, providing REST API endpo
 
 - Python 3.14 or higher
 - [uv](https://docs.astral.sh/uv/getting-started/installation/)
+- Docker (for local DynamoDB)
 
 ### Installation
 
@@ -19,16 +20,26 @@ FastAPI backend for the Everything Tracker application, providing REST API endpo
 
 2. **Create environment and Install deps**:
    ```bash
-    uv sync
+   uv sync
    ```
 
-4. **Set up environment variables**:
+3. **Set up environment variables**:
    ```bash
    cp .env.example .env
    # Edit .env with your actual values
    ```
 
-5. **Run the application**:
+4. **Start local DynamoDB** (optional, for local development):
+   ```bash
+   make db-init
+   ```
+
+5. **Set up local database tables** (if using local DynamoDB):
+   ```bash
+   uv run python setup_local_db.py
+   ```
+
+6. **Run the application**:
    ```bash
    # Port on 8080
    uv run fastapi dev
@@ -36,14 +47,19 @@ FastAPI backend for the Everything Tracker application, providing REST API endpo
 
 The API will be available at: http://localhost:8000
 
-## Adding Dependency
+## 🧪 Testing
+
+### Local DynamoDB Testing
+
+For testing with local DynamoDB:
+```bash
+make db-init
+```
+
+### Test Coverage
 
 ```bash
-// Dev
-uv add --dev <package>
-
-// Dev and Prod
-uv add <package>
+uv run pytest --cov=app --cov-report=html
 ```
 
 ## 📋 Environment Variables
@@ -51,17 +67,25 @@ uv add <package>
 Create a `.env` file in the backend directory with the following variables:
 
 ```env
-# Google OAuth Configuration
-GOOGLE_CLIENT_ID=your-google-client-id
-GOOGLE_CLIENT_SECRET=your-google-client-secret
-GOOGLE_REDIRECT_URI=http://localhost:8000/auth/callback
+JWT_SECRET_KEY=your-super-secret-jwt-key-change-this-in-production
+JWT_ALGORITHM=HS256
+MAGIC_LINK_EXPIRY_MINUTES=15
+FRONTEND_URL=http://localhost:3000
 
-# AWS Configuration
-DYNAMODB_TABLE=EverythingTracker
+# AWS SES Configuration
+SES_FROM_EMAIL=noreply@yourdomain.com
 AWS_REGION=ap-southeast-1
 
-# Optional: OpenAI API Key (for AI features)
-OPENAI_API_KEY=your-openai-api-key
+# DynamoDB Configuration
+USERS_TABLE_NAME=everything-tracker-users
+EXPENSES_TABLE_NAME=everything-tracker-expenses
+
+# Local DynamoDB (set to true for local development)
+USE_LOCAL_DYNAMODB=true
+LOCAL_DYNAMODB_ENDPOINT=http://localhost:8000
+
+# Legacy Database (deprecated)
+DYNAMODB_TABLE=EverythingTracker
 ```
 
 ## 🛠️ Development

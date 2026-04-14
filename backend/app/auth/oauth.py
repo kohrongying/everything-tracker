@@ -172,11 +172,11 @@ def send_magic_link_email(email: str) -> bool:
         )
         return False
 
-def generate_access_token(email: str) -> str:
+def generate_access_token(user_uuid: str) -> str:
     """Generate a JWT access token for authenticated users."""
     expire = datetime.now(UTC) + timedelta(days=7)  # 7 days expiry
     to_encode = {
-        "email": email,
+        "user_uuid": user_uuid,
         "exp": expire,
         "type": "access_token"
     }
@@ -184,10 +184,10 @@ def generate_access_token(email: str) -> str:
     return encoded_jwt
 
 def verify_access_token(token: str) -> Optional[str]:
-    """Verify and decode access token. Returns email if valid, None if invalid."""
+    """Verify and decode access token. Returns (user_uuid) if valid, None if invalid."""
     try:
         payload = jwt.decode(token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm])
-        email: str = payload.get("email")
+        user_uuid: str = payload.get("user_uuid")
         token_type: str = payload.get("type")
 
         if token_type != "access_token":
@@ -203,7 +203,7 @@ def verify_access_token(token: str) -> Optional[str]:
             )
             return None
 
-        return email
+        return user_uuid
     except JWTError as e:
         logger.warning(
             "JWT verification failed for access token",

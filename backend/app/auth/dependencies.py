@@ -16,15 +16,13 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Security(securi
         )
 
     token = credentials.credentials
-    email = verify_access_token(token)
+    user_uuid = verify_access_token(token)
 
-    if not email:
+    if not user_uuid:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    # For now, create a basic user object. In production, you'd fetch from database
-    # TODO: Implement proper user lookup from database
-    return User(id=email, email=email, name=email.split('@')[0])
+    return User(uuid=user_uuid)

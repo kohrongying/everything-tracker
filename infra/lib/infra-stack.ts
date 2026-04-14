@@ -2,12 +2,17 @@ import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
+import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as path from 'path';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
 
 export class InfraStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
+
+    // CONSTANTS
+    const USERS_TABLE_NAME = 'everything-tracker-users'
+    const EXPENSES_TABLE_NAME = 'everything-tracker-expenses'
 
     // https://docs.aws.amazon.com/powertools/python/3.14.0/#x86_65
     const powertools_layer = lambda.LayerVersion.fromLayerVersionArn(this, "lambda-powertools",
@@ -46,8 +51,44 @@ export class InfraStack extends cdk.Stack {
         STAGE: 'prod', // Defaults to RestApi default stage name
         SES_FROM_EMAIL: 'rongdevs@gmail.com',
         FRONTEND_URL_PARAMETER_NAME: '/everything-tracker/rest-api-url',
-        JWT_SECRET_KEY_PARAMETER_NAME: '/everything-tracker/jwt-secret-key'
+        JWT_SECRET_KEY_PARAMETER_NAME: '/everything-tracker/jwt-secret-key',
+        USERS_TABLE_NAME,
+        EXPENSES_TABLE_NAME,
       },
+    });
+
+    // DynamoDB Tables
+    const usersTable = new dynamodb.Table(this, 'UsersTable', {
+      tableName: USERS_TABLE_NAME,
+      partitionKey: {
+        name: 'email',
+        type: dynamodb.AttributeType.STRING,
+      },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      deletionProtection: true,
+    });
+
+    const expensesTable = new dynamodb.Table(this, 'ExpensesTable', {
+      tableName: EXPENSES_TABLE_NAME,
+      partitionKey: {
+        name: 'id',
+        type: dynamodb.AttributeType.STRING,
+      },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      deletionProtection: true,
+    });
+
+    // Global Secondary Index for expenses on user_id
+    expensesTable.addGlobalSecondaryIndex({
+      indexName: 'user_id_index',
+      partitionKey: {
+        name: 'user_id',
+        type: dynamodb.AttributeType.STRING,
+      },
+      sortKey: {
+        name: 'expense_date',
+        type: dynamodb.AttributeType.STRING,
+      }
     });
 
     // API Gateway
@@ -100,6 +141,15 @@ export class InfraStack extends cdk.Stack {
     backendFunction.addToRolePolicy(new cdk.aws_iam.PolicyStatement({
       actions: ['kms:Decrypt'],
       resources: ['*'], // Consider restricting this to specific KMS keys in production
+    }));
+
+    // Grant DynamoDB permissions to the Lambda function
+    usersTable.grantReadWriteData(backendFunction);
+    expensesTable.grantReadWriteData(backendFunction);
+
+    backendFunction.addToRolePolicy(new cdk.aws_iam.PolicyStatement({
+      actions: ['dynamodb:Query'],
+      resources: [expensesTable.tableArn, `${expensesTable.tableArn}/index/user_id-index`],
     }));
   
 }}
