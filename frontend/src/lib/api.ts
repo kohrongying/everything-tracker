@@ -41,14 +41,14 @@ export async function addExpense(amount: number, description: string) {
 	return request('/expense', 'POST', { amount, description });
 }
 
-// export async function addFood(name: string, calories: number, protein: number) {
-// 	return request('/food', 'POST', { name, calories, protein });
-// }
+export async function addFood(name: string, calories: number, protein: number) {
+	return request('/food', 'POST', { name, calories, protein });
+}
 
-// export async function addExercise(name: string, weight: number, reps: number, sets: number) {
-// 	return request('/exercise', 'POST', { name, weight, reps, sets });
-// }
+export async function addExercise(name: string, weight: number, reps: number, sets: number) {
+	return request('/exercise', 'POST', { name, weight, reps, sets });
+}
 
-// export async function addFocusSession(durationSeconds: number) {
-// 	return request('/focus', 'POST', { duration_seconds: durationSeconds });
-// }
+export async function addFocusSession(durationSeconds: number) {
+	return request('/focus', 'POST', { duration_seconds: durationSeconds });
+}
