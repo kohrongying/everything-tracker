@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 jobs:
-  test:
+  test_backend:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -32,9 +32,12 @@ jobs:
       - name: Run pytest
         run: uv run python -m pytest
 
-  build:
-    needs: test
+  build_infra:
+    needs: test_backend
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra
 
     steps:
       - name: Checkout repository
@@ -52,10 +55,13 @@ jobs:
         run: npm run cdk:synth
 
   deploy:
-    needs: build
+    needs: build_infra
     runs-on: ubuntu-latest
     environment:
       name: production
+    defaults:
+      run:
+        working-directory: infra
 
     steps:
       - name: Checkout repository
