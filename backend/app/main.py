@@ -5,10 +5,12 @@ from datetime import datetime, UTC
 from aws_lambda_powertools.logging import Logger
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.routers import auth, expense, food, exercise, focus
+from app.core.config import settings
 
 logger = Logger(service="everything-tracker")
 
@@ -17,6 +19,13 @@ stage = os.getenv("STAGE", "")
 root_path = f"/{stage}" if stage else ""
 
 app = FastAPI(root_path=root_path)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[settings.frontend_url],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class RequestLoggingMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):

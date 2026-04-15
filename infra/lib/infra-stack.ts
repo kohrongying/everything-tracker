@@ -50,7 +50,7 @@ export class InfraStack extends cdk.Stack {
         // Add environment variables as needed
         STAGE: 'prod', // Defaults to RestApi default stage name
         SES_FROM_EMAIL: 'rongdevs@gmail.com',
-        FRONTEND_URL_PARAMETER_NAME: '/everything-tracker/rest-api-url',
+        FRONTEND_URL: 'https://everything-tracker.netlify.app',
         JWT_SECRET_KEY_PARAMETER_NAME: '/everything-tracker/jwt-secret-key',
         USERS_TABLE_NAME,
         EXPENSES_TABLE_NAME,

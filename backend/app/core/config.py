@@ -29,9 +29,7 @@ class Settings(BaseSettings):
         15, validation_alias="MAGIC_LINK_EXPIRY_MINUTES"
     )
 
-    frontend_url_param_name: str = Field(
-        "", validation_alias="FRONTEND_URL_PARAMETER_NAME"
-    )
+    # Netlify URL
     frontend_url: str = Field("http://localhost:3000", validation_alias="FRONTEND_URL")
 
     # AWS SES Settings
@@ -65,11 +63,6 @@ class Settings(BaseSettings):
                 self.jwt_secret_key_param_name,
                 self.jwt_secret_key,
                 decrypt=True,
-            )
-
-            self.frontend_url = _get_parameter(
-                self.frontend_url_param_name,
-                self.frontend_url,
             )
 
 settings = Settings()
