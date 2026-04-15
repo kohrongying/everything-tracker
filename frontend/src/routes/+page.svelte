@@ -1,7 +1,14 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
+	import { onMount } from 'svelte';
 	import SectionCard from '$lib/ui/SectionCard.svelte';
 	import { Wallet, Apple, Dumbbell, Zap } from 'lucide-svelte';
+	import { auth } from '$lib/api';
+
+	let isLoggedIn = $state(false);
+	onMount(() => {
+		isLoggedIn = auth.isLoggedIn();
+	});
 </script>
 
 <!-- Hero Section -->
@@ -14,7 +21,9 @@
 				real-time.
 			</p>
 			<div class="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
-				<a href={resolve('/login')} class="btn btn-primary">Sign In</a>
+				{#if !isLoggedIn}
+					<a href={resolve('/login')} class="btn btn-primary">Sign In</a>
+				{/if}
 				<a href={resolve('/setup')} class="btn btn-outline btn-primary">Setup Profile</a>
 			</div>
 		</div>
